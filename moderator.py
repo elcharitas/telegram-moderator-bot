@@ -38,6 +38,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 DISALLOWED_WORDS = {'scam', 'signup here', 'join my group', 'register and get', 'Sign up'}
 
 
@@ -45,6 +46,7 @@ def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
     token = os.getenv('MODERATOR_BOT_TOKEN')
+    app = Flask(__name__)
     if not token:
         print(
             'MODERATOR_BOT_TOKEN environment variable not found.')
@@ -107,11 +109,13 @@ def main():
     # Send all errors to the logger.
     dp.add_error_handler(error)
 
-    updater.start_polling()
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+    @app.route('/')
+    def index():
+        updater.start_polling()
+        # Run the bot until you press Ctrl-C or the process receives SIGINT,
+        updater.idle()
+        return ""
+    app.run()
 
 
 if __name__ == '__main__':
