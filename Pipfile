@@ -8,6 +8,7 @@ python-telegram-bot = "*"
 googletrans = "*"
 profanity = "*"
 deep-translator = "*"
+flask = "*"
 
 [dev-packages]
 
