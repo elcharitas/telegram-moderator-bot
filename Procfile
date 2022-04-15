@@ -1,1 +1,1 @@
-web: python moderator.py
+process: python moderator.py

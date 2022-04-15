@@ -101,7 +101,6 @@ def main():
         """Log Errors caused by Updates."""
         logger.warning('Update "%s" caused error "%s"', update, error)
 
-
     # Listen for messages and moderate them.
     dp.add_handler(MessageHandler(Filters.text, moderate))
 
