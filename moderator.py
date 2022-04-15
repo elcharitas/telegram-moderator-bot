@@ -46,7 +46,6 @@ def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
     token = os.getenv('MODERATOR_BOT_TOKEN')
-    app = Flask(__name__)
     if not token:
         print(
             'MODERATOR_BOT_TOKEN environment variable not found.')
@@ -109,13 +108,9 @@ def main():
     # Send all errors to the logger.
     dp.add_error_handler(error)
 
-    @app.route('/')
-    def index():
-        updater.start_polling()
-        # Run the bot until you press Ctrl-C or the process receives SIGINT,
-        updater.idle()
-        return ""
-    app.run()
+    updater.start_polling()
+    # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    updater.idle()
 
 
 if __name__ == '__main__':
