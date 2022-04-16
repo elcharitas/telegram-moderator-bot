@@ -25,6 +25,7 @@ Other references:
 """
 
 
+
 import os
 from telegram.ext import Updater, MessageHandler, Filters
 from profanity import profanity
@@ -39,7 +40,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-DISALLOWED_WORDS = {'scam', 'signup here', 'join my group', 'register and get', 'Sign up'}
+DISALLOWED_WORDS = {
+    'scam',
+    'signup here',
+    'join my group',
+    'register and get',
+    'Sign up',
+}
 
 
 def main():
@@ -59,7 +66,7 @@ def main():
     def is_text_bad(text):
         text = GoogleTranslator('auto','en').translate(text)
         words = set(text.lower().split())
-        if words & DISALLOWED_WORDS:
+        if words.intersection(DISALLOWED_WORDS):
             return True
         return profanity.contains_profanity(text) or False
 
