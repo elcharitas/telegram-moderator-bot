@@ -27,9 +27,20 @@ Other references:
 
 
 import os
-from telegram.ext import Updater, MessageHandler, Filters
+
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, Update
+from telegram.ext import (
+    Updater,
+    CommandHandler,MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+    CallbackContext,
+)
+
+# Enable logging
+from telegram.utils import helpers
 from profanity import profanity
-from deep_translator import GoogleTranslator
+# from deep_translator import GoogleTranslator
 import logging
 
 # Enable logging
@@ -46,7 +57,61 @@ DISALLOWED_WORDS = {
     'join my group',
     'register and get',
     'Sign up',
+    'Scam',
 }
+def start(update: Update, context: CallbackContext) -> None:
+    """Send a deep-linked URL when the command /start is issued."""
+    bot = context.bot
+    url = helpers.create_deep_linked_url(bot.username, CHECK_THIS_OUT, group=True)
+    text = "Feel free to tell your friends about it:\n\n" + url
+    update.message.reply_text(text)
+
+
+def deep_linked_level_1(update: Update, context: CallbackContext) -> None:
+    """Reached through the CHECK_THIS_OUT payload"""
+    bot = context.bot
+    url = helpers.create_deep_linked_url(bot.username, SO_COOL)
+    text = (
+        "Awesome, you just accessed hidden functionality! "
+        "Now let's get back to the private chat."
+    )
+    keyboard = InlineKeyboardMarkup.from_button(
+        InlineKeyboardButton(text="Continue here!", url=url)
+    )
+    update.message.reply_text(text, reply_markup=keyboard)
+
+
+def deep_linked_level_2(update: Update, context: CallbackContext) -> None:
+    """Reached through the SO_COOL payload"""
+    bot = context.bot
+    url = helpers.create_deep_linked_url(bot.username, USING_ENTITIES)
+    text = f"You can also mask the deep-linked URLs as links: [▶️ CLICK HERE]({url})."
+    update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+
+
+def deep_linked_level_3(update: Update, context: CallbackContext) -> None:
+    """Reached through the USING_ENTITIES payload"""
+    update.message.reply_text(
+        "It is also possible to make deep-linking using InlineKeyboardButtons.",
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton(text="Like this!", callback_data=KEYBOARD_CALLBACKDATA)]]
+        ),
+    )
+
+
+def deep_link_level_3_callback(update: Update, context: CallbackContext) -> None:
+    """Answers CallbackQuery with deeplinking url."""
+    bot = context.bot
+    url = helpers.create_deep_linked_url(bot.username, USING_KEYBOARD)
+    update.callback_query.answer(url=url)
+
+
+def deep_linked_level_4(update: Update, context: CallbackContext) -> None:
+    """Reached through the USING_KEYBOARD payload"""
+    payload = context.args
+    update.message.reply_text(
+        f"Congratulations! This is as deep as it gets 👏🏻\n\nThe payload was: {payload}"
+    )
 
 
 def main():
@@ -59,12 +124,12 @@ def main():
         return
 
     updater = Updater(token, use_context=True)
-    dp = updater.dispatcher
+    dp = updater.dp
 
     # translator = Translator()
     
     def is_text_bad(text):
-        text = GoogleTranslator('auto','en').translate(text)
+        # text = GoogleTranslator('auto','en').translate(text)
         words = set(text.lower().split())
         if words.intersection(DISALLOWED_WORDS):
             return True
@@ -82,7 +147,7 @@ def main():
                         message_id=update.message.message_id)
                     updater.bot.send_message(
                         chat_id=chat_id,
-                        text=f'What a shame, {update.message.from_user.first_name}, I had to delete your message. It violates our community rules.',
+                        text=f'@{update.message.from_user.username}, I had to delete your message as it contains censored words. Please refrain from using profain words.',
                     )
                     context.user_data[user_id] += 1
                     # Uncomment this to also kick the user from the group:
@@ -111,6 +176,31 @@ def main():
 
     # Listen for messages and moderate them.
     dp.add_handler(MessageHandler(Filters.text, moderate))
+# Register a deep-linking handler
+    dp.add_handler(
+        CommandHandler("start", deep_linked_level_1, Filters.regex(CHECK_THIS_OUT))
+    )
+
+    # This one works with a textual link instead of an URL
+    dp.add_handler(CommandHandler("start", deep_linked_level_2, Filters.regex(SO_COOL)))
+
+    # We can also pass on the deep-linking payload
+    dp.add_handler(
+        CommandHandler("start", deep_linked_level_3, Filters.regex(USING_ENTITIES))
+    )
+
+    # Possible with inline keyboard buttons as well
+    dp.add_handler(
+        CommandHandler("start", deep_linked_level_4, Filters.regex(USING_KEYBOARD))
+    )
+
+    # register callback handler for inline keyboard button
+    dp.add_handler(
+        CallbackQueryHandler(deep_link_level_3_callback, pattern=KEYBOARD_CALLBACKDATA)
+    )
+
+    # Make sure the deep-linking handlers occur *before* the normal /start handler.
+    dp.add_handler(CommandHandler("start", start))
 
     # Send all errors to the logger.
     dp.add_error_handler(error)
