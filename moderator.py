@@ -124,7 +124,7 @@ def main():
         return
 
     updater = Updater(token, use_context=True)
-    dp = updater.dp
+    dp = updater.dispatcher
 
     # translator = Translator()
     
