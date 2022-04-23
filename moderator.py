@@ -57,7 +57,7 @@ USING_KEYBOARD = "using-keyboard-here"
 SO_COOL = "so-cool"
 
 # Callback data to pass in 3rd level deep-linking
-
+KEYBOARD_CALLBACKDATA = "keyboard-callback-data"
 
 DISALLOWED_WORDS = {
     'scam',
