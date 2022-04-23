@@ -50,6 +50,14 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+# Define constants that will allow us to reuse the deep-linking parameters.
+CHECK_THIS_OUT = "check-this-out"
+USING_ENTITIES = "using-entities-here"
+USING_KEYBOARD = "using-keyboard-here"
+SO_COOL = "so-cool"
+
+# Callback data to pass in 3rd level deep-linking
+
 
 DISALLOWED_WORDS = {
     'scam',
@@ -58,6 +66,8 @@ DISALLOWED_WORDS = {
     'register and get',
     'Sign up',
     'Scam',
+    'Fuck',
+    'Shit'
 }
 def start(update: Update, context: CallbackContext) -> None:
     """Send a deep-linked URL when the command /start is issued."""
